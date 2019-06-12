@@ -1,0 +1,243 @@
+﻿<Window x:Class="WeatherMinus.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:loc="clr-namespace:WeatherMinus.Controls"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WeatherMinus"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="1650" Width="1000" MinWidth="520">
+    <Window.Resources>
+        <Style TargetType="loc:CircularProgressBar">
+            <Setter Property="StrokeThickness" Value="6"/>
+            <Setter Property="SegmentColor" Value="#69EAFF"/>
+        </Style>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
+        <Style TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="1" Background="#384E69">
+            <Image Source="{Binding NowForecast.BackgoundImagePath}" Opacity="0.9"
+                   Stretch="UniformToFill" VerticalAlignment="Top"
+                   HorizontalAlignment="Right"/>
+            <Grid>
+                <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <StackPanel HorizontalAlignment="Center" Margin="50 0 50 0">
+                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                            <TextBlock Text="{Binding NowForecast.Name}"/>
+                            <TextBlock Text="{Binding NowForecast.Sys.country,StringFormat=\, {0}}"/>
+                        </StackPanel>
+                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                            <Image VerticalAlignment="Center" Source="{Binding Path=NowForecast.icon}"
+                                   MaxHeight="90"/>
+                            <TextBlock VerticalAlignment="Center" FontSize="50"
+                                       Text="{Binding Path=NowForecast.Main.temp,StringFormat={}{0}°}"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <Button FontWeight="Bold" FontSize="25" 
+                                        Command="{Binding FarengateToCelsius}">C</Button>
+                                <Button FontWeight="Bold" FontSize="25" 
+                                        Command="{Binding CelsiusToFarengate}">F</Button>
+                            </StackPanel>
+                        </StackPanel>
+                        <TextBlock Text="{Binding NowForecast.descr}" HorizontalAlignment="Center"/>
+                        <TextBlock HorizontalAlignment="Center" FontSize="15"
+                                   Text="{Binding LastUpdateTime,StringFormat=Update as of {0}}"/>
+                        <StackPanel>
+                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock Margin="10 0 10 0" FontSize="15"
+                                           Text="{Binding NowForecast.FeelsLike,StringFormat=Feels like {0}°}"/>
+                                <TextBlock Margin="10 0 10 0" FontSize="15"
+                                           Text="{Binding NowForecast.Wind.speed,StringFormat=Wind {0}km/h}"/>
+                                <TextBlock Margin="10 0 10 0" FontSize="15"
+                                           Text="{Binding NowForecast.visibility,StringFormat=Visibility {0}km}"/>
+                            </StackPanel>
+                            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock Margin="10 0 10 0" FontSize="15"
+                                           Text="{Binding NowForecast.Main.pressure,StringFormat=Barometr {0}mb}"/>
+                                <TextBlock Margin="10 0 10 0" FontSize="15"
+                                           Text="{Binding NowForecast.Main.humidity,StringFormat=Humidity {0}%}"/>
+                                <TextBlock Margin="10 0 10 0" FontSize="15"
+                                           Text="{Binding NowForecast.DewPoint,StringFormat=Dew point {0}°}"/>
+                            </StackPanel>
+                        </StackPanel>
+                        
+                        <TextBlock>Daily</TextBlock>
+                        <ListBox TargetUpdated="LB_TargetUpdated"
+                                 Name="DialyLB" SelectedIndex="0" 
+                                 ItemsSource="{Binding Path=Forecasts, NotifyOnTargetUpdated=True}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="5 0 5 0" MinHeight="120" MinWidth="125">
+                                        <StackPanel>
+                                            <TextBlock Foreground="White" HorizontalAlignment="Left" FontSize="18" Text="{Binding Day}"/>
+                                            <Image HorizontalAlignment="Left"  MaxHeight="35" MaxWidth="35"
+                                                   Source="{Binding icon}"/>
+                                            <StackPanel HorizontalAlignment="Left"  Orientation="Horizontal">
+                                                <TextBlock Foreground="White" FontSize="40" Text="{Binding temp_max,StringFormat={}{0}°}"/>
+                                                <TextBlock Margin="0 20 0 0" FontSize="20" Foreground="#B9C0C8" Text="{Binding temp_min,StringFormat={}{0}°}"/>
+                                            </StackPanel>
+                                            <TextBlock Foreground="White" FontSize="15" HorizontalAlignment="Left" Text="{Binding descr}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <TextBlock>Hourly</TextBlock>
+                        <ListBox ItemsSource="{Binding ElementName=DialyLB,Path=SelectedItem.Hourlies}">
+                            <ListBox.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Orientation="Horizontal"/>
+                                </ItemsPanelTemplate>
+                            </ListBox.ItemsPanel>
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid MinHeight="105" MinWidth="105">
+                                        <StackPanel>
+                                            <Line X1="00" Y1="00" X2="105" Y2="0" Stroke="Gray" Margin="0 5 0 5" StrokeThickness="1.5" />
+                                            <Image HorizontalAlignment="Left"  MaxHeight="35" MaxWidth="35"
+                                                   Source="{Binding icon}"/>
+                                            <TextBlock Foreground="White" FontSize="40" Text="{Binding temp,StringFormat={}{0}°}"/>
+                                            <TextBlock Margin="0 0 0 15" Foreground="White" FontSize="15" HorizontalAlignment="Left" Text="{Binding descr}"/>
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                                <Image Source="/Images/ICONS/raindrop.png" MaxHeight="15" MaxWidth="15"/>
+                                                <TextBlock Foreground="White" Text="{Binding humidity,StringFormat={}{0}%}"/>
+                                            </StackPanel>
+                                            <StackPanel Margin="0 0 0 7" Orientation="Horizontal" HorizontalAlignment="Left">
+                                                <Image Source="/Images/ICONS/map.png" MaxHeight="20" MaxWidth="20" RenderTransformOrigin="0.5 0.5">
+                                                    <Image.RenderTransform>
+                                                        <RotateTransform Angle="{Binding deg}"/>
+                                                    </Image.RenderTransform>
+                                                </Image>
+                                                <TextBlock Foreground="White" Text="{Binding wind,StringFormat={}{0}km/h}"/>
+                                            </StackPanel>
+                                            <Line X1="00" Y1="00" X2="110" Y2="0" Stroke="Gray" Margin="0 5 0 5" StrokeThickness="1.5" />
+                                            <TextBlock HorizontalAlignment="Center" FontWeight="Bold" Foreground="White" Text="{Binding time}"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        
+                        <TextBlock Margin="5 0 0 10">Day Details</TextBlock>
+                        <WrapPanel Orientation="Horizontal">
+                            <StackPanel MinWidth="210">
+                                <Line X1="5" Y1="00" X2="205" Y2="0" Stroke="Gray" Margin="0 5 0 5" StrokeThickness="1.5" />
+                                <TextBlock FontSize="20" FontWeight="Bold">Day</TextBlock>
+                                <TextBlock FontSize="20" >It's gonna be <LineBreak/> good day.</TextBlock>
+                                <TextBlock FontSize="20" FontWeight="Bold">Night</TextBlock>
+                                <TextBlock FontSize="20">Night gonna be <LineBreak/> lonely.</TextBlock>
+                            </StackPanel>
+                            <StackPanel MinWidth="210">
+                                <Line X1="5" Y1="00" X2="205" Y2="0" Stroke="Gray" Margin="0 5 0 5" StrokeThickness="1.5" />
+                                <TextBlock FontSize="20" FontWeight="Bold">Sunrise</TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image MaxHeight="60" Source="/Images/ICONS/sunrise.png"/>
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding NowForecast.Sunrise}"/>
+                                </StackPanel>
+                                <TextBlock FontSize="20" FontWeight="Bold">Sunset</TextBlock>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image MaxHeight="60" Source="/Images/ICONS/sunset.png"/>
+                                    <TextBlock VerticalAlignment="Center" Text="{Binding NowForecast.Sunset}"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel MinWidth="210">
+                                <StackPanel MinWidth="115">
+                                    <Line X1="5" Y1="00" X2="205" Y2="0" Stroke="Gray" Margin="0 5 0 5" StrokeThickness="1.5" />
+                                    <TextBlock FontSize="20" FontWeight="Bold" >Moonset</TextBlock>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image MaxHeight="60" Source="/Images/ICONS/moonset.png"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding NowForecast.Moonrise}"/>
+                                    </StackPanel>
+                                    <TextBlock FontSize="20" FontWeight="Bold">Moonrise</TextBlock>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Image MaxHeight="60" Source="/Images/ICONS/moonrise.png"/>
+                                        <TextBlock VerticalAlignment="Center" Text="{Binding NowForecast.Moonset}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel MinWidth="300">
+                                <Line X1="5" Y1="00" X2="295" Y2="0" Stroke="Gray" Margin="0 5 0 5" StrokeThickness="1.5" />
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Margin="0 0 30 0">
+                                        <TextBlock FontWeight="Bold" FontSize="20">Precipitation</TextBlock>
+                                        <Grid>
+                                            <loc:CircularProgressBar Radius="35" Percentage="43"/>
+                                            <TextBlock Margin="0 0 40 0" HorizontalAlignment="Center"
+                                                       FontSize="30" VerticalAlignment="Center" Text="43%"/>
+                                        </Grid>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock FontSize="20" FontWeight="Bold">Humidity</TextBlock>
+                                        <Grid>
+                                            <loc:CircularProgressBar Radius="35" Percentage="{Binding ElementName=DialyLB,Path=SelectedItem.humidity}"/>
+                                            <TextBlock Margin="0 0 15 0" HorizontalAlignment="Center"
+                                                       FontSize="30" VerticalAlignment="Center" Text="{Binding ElementName=DialyLB,Path=SelectedItem.humidity,StringFormat={}{0}%}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <StackPanel Margin="0 0 60 0">
+                                        <TextBlock FontSize="20" FontWeight="Bold">UV Index</TextBlock>
+                                        <Grid>
+                                            <loc:CircularProgressBar Radius="40" Percentage="{Binding ElementName=DialyLB,Path=SelectedItem.uvindex}"/>
+                                            <TextBlock Margin="0 0 10 0" HorizontalAlignment="Center" FontSize="30" VerticalAlignment="Center" Text="{Binding ElementName=DialyLB,Path=SelectedItem.uvindex}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <TextBlock FontSize="20" FontWeight="Bold">Wind</TextBlock>
+                                        <Grid>
+                                            <Image Source="/Images/ICONS/cback.png" MaxHeight="100"/>
+                                            <Image RenderTransformOrigin="0.5,0.5" Source="/Images/ICONS/map.png" MaxHeight="100">
+                                                <Image.RenderTransform>
+                                                    <RotateTransform Angle="{Binding ElementName=DialyLB,Path=SelectedItem.deg}"/>
+                                                </Image.RenderTransform>
+                                            </Image>
+                                            <TextBlock Foreground="Gray" FontSize="17" FontWeight="Bold" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding ElementName=DialyLB,Path=SelectedItem.wind,StringFormat={}{0}km/h}"/>
+                                        </Grid>
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </WrapPanel>
+                        
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+        
+        <Grid Background="#37475B">
+            <DockPanel LastChildFill="False">
+                <TextBlock Margin="20 0 0 0" FontSize="30" FontWeight="Bold" Foreground="White">Forecast</TextBlock>
+                <Border CornerRadius="1" Background="#2C344A" DockPanel.Dock="Right" BorderThickness="3" Margin="10 0 15 0">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBox Text="{Binding citytb,Mode=TwoWay}" Foreground="White" FontSize="30" BorderThickness="0" Background="Transparent" MinWidth="190"/>
+                        <Button Command="{Binding Path=CityChanged}" Margin="5 0 0 0" FontSize="20">🔎</Button>
+                    </StackPanel>
+                </Border>
+                <Button DockPanel.Dock="Right" MinHeight="20" MinWidth="30" FontSize="30" Margin="7 0 7 0">⋮</Button>
+                <Button Command="{Binding Path=Refresh}" DockPanel.Dock="Right" FontSize="30" Margin="7 0 7 0">🗘</Button>
+            </DockPanel>
+        </Grid>
+    </Grid>
+</Window>
